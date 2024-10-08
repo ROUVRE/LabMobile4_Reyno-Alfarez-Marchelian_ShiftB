@@ -1,8 +1,8 @@
 class Produk {
-  int? id;
+  String? id;
   String? kodeProduk;
   String? namaProduk;
-  int? hargaProduk;
+  var hargaProduk;
   Produk({this.id, this.kodeProduk, this.namaProduk, this.hargaProduk});
   factory Produk.fromJson(Map<String, dynamic> obj) {
     return Produk(

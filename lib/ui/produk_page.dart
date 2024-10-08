@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tugas_pertemuan_4/bloc/logout_bloc.dart';
+import 'package:tugas_pertemuan_4/bloc/produk_bloc.dart';
 import 'package:tugas_pertemuan_4/model/produk.dart';
+import 'package:tugas_pertemuan_4/ui/login_page.dart';
 import 'package:tugas_pertemuan_4/ui/produk_detail.dart';
 import 'package:tugas_pertemuan_4/ui/produk_form.dart';
 
@@ -13,61 +16,72 @@ class _ProdukPageState extends State<ProdukPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('List Produk Reyno'),
-          actions: [
-            Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: GestureDetector(
-                  child: const Icon(Icons.add, size: 26.0),
-                  onTap: () async {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ProdukForm()));
-                  },
-                ))
-          ],
-        ),
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              ListTile(
-                title: const Text('Logout'),
-                trailing: const Icon(Icons.logout),
-                onTap: () async {},
-              )
-            ],
-          ),
-        ),
-        body: ListView(
+      appBar: AppBar(
+        title: const Text('List Produk Reyno'),
+        actions: [
+          Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                child: const Icon(Icons.add, size: 26.0),
+                onTap: () async {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ProdukForm()));
+                },
+              ))
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
           children: [
-            ItemProduk(
-                produk: Produk(
-                    id: 1,
-                    kodeProduk: 'A001',
-                    namaProduk: 'Kamera',
-                    hargaProduk: 5000000)),
-            ItemProduk(
-                produk: Produk(
-                    id: 2,
-                    kodeProduk: 'A002',
-                    namaProduk: 'Kulkas',
-                    hargaProduk: 2500000)),
-            ItemProduk(
-                produk: Produk(
-                    id: 3,
-                    kodeProduk: 'A003',
-                    namaProduk: 'Mesin Cuci',
-                    hargaProduk: 2000000)),
+            ListTile(
+              title: const Text('Logout'),
+              trailing: const Icon(Icons.logout),
+              onTap: () async {
+                await LogoutBloc.logout().then((value) => {
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                          (route) => false)
+                    });
+              },
+            )
           ],
-        ));
+        ),
+      ),
+      body: FutureBuilder<List>(
+        future: ProdukBloc.getProduks(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) print(snapshot.error);
+          return snapshot.hasData
+              ? ListProduk(
+                  list: snapshot.data,
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
+      ),
+    );
+  }
+}
+
+class ListProduk extends StatelessWidget {
+  final List? list;
+  const ListProduk({Key? key, this.list}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        itemCount: list == null ? 0 : list!.length,
+        itemBuilder: (context, i) {
+          return ItemProduk(
+            produk: list![i],
+          );
+        });
   }
 }
 
 class ItemProduk extends StatelessWidget {
   final Produk produk;
-
   const ItemProduk({Key? key, required this.produk}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
